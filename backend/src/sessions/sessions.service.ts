@@ -1,12 +1,20 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateBookingDto } from './create-booking.dto.js';
 import { CreateSessionDto } from './create-session.dto.js';
+import { BookingEmailService } from './booking-email.service.js';
 
 @Injectable()
 export class SessionsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly bookingEmail: BookingEmailService,
+  ) {}
 
   create(dto: CreateSessionDto) {
     return this.prisma.session.create({
@@ -32,9 +40,12 @@ export class SessionsService {
 
   async book(sessionId: number, dto: CreateBookingDto) {
     try {
-      return await this.prisma.booking.create({
+      const { session, ...booking } = await this.prisma.booking.create({
         data: { sessionId, name: dto.name, email: dto.email },
+        include: { session: true },
       });
+      const emailStatus = await this.bookingEmail.send({ ...booking, session });
+      return { ...booking, emailStatus };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {

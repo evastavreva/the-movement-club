@@ -7,6 +7,8 @@ export type Session = {
   available: boolean
 }
 
+export type BookingResult = { emailStatus: 'sent' | 'failed' | 'disabled' }
+
 export class ApiError extends Error {
   status: number
   constructor(status: number) {
@@ -30,11 +32,12 @@ export async function createSession(session: Pick<Session, 'classType' | 'instru
   if (!response.ok) throw new ApiError(response.status)
 }
 
-export async function bookSession(id: number, booking: { name: string; email: string }): Promise<void> {
+export async function bookSession(id: number, booking: { name: string; email: string }): Promise<BookingResult> {
   const response = await fetch(`/api/sessions/${id}/book`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(booking),
   })
   if (!response.ok) throw new ApiError(response.status)
+  return response.json()
 }
