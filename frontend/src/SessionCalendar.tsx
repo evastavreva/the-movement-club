@@ -55,7 +55,8 @@ export default function SessionCalendar({ sessions, selectedId, saving, now, onS
                 {slots.length === 0 ? <span className="no-session" aria-label={`No ${period.toLowerCase()} sessions on ${key}`}>—</span>
                   : slots.map((session) => <button
                     key={session.id}
-                    className={`calendar-session ${session.classType.includes('Yoga') ? 'yoga-session' : ''} ${selectedId === session.id ? 'is-selected' : ''}`}
+                    className={`calendar-session ${selectedId === session.id ? 'is-selected' : ''}`}
+                    data-class={session.classType}
                     disabled={saving}
                     aria-pressed={selectedId === session.id}
                     aria-label={`Book ${session.classType} with ${session.instructor}, ${fullDate.format(new Date(session.startTime))} at ${timeLabel.format(new Date(session.startTime))}, ${session.duration} minutes`}

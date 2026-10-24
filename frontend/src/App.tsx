@@ -13,8 +13,8 @@ const timeFormat = new Intl.DateTimeFormat('en-GB', {
 })
 
 const practices = [
-  { name: 'Reformer Pilates', pace: 'Controlled · Equipment-based', description: 'Move on a sliding carriage with adjustable springs for support and resistance. Expect precise, guided movements using the footbar, straps, and carriage.' },
   { name: 'Mat Pilates', pace: 'Focused · Mat-based', description: 'Practice controlled movements on a mat using your own body weight, sometimes with small props. Expect floor exercises that bring attention to your core, alignment, and breath.' },
+  { name: 'Reformer Pilates', pace: 'Controlled · Equipment-based', description: 'Move on a sliding carriage with adjustable springs for support and resistance. Expect precise, guided movements using the footbar, straps, and carriage.' },
   { name: 'Vinyasa Yoga', pace: 'Flowing · Breath-led', description: 'Link poses together in a flowing sequence, moving with your breath. Expect transitions between standing poses, balances, and mat work, followed by a quiet rest.' },
   { name: 'Hatha Yoga', pace: 'Unhurried · Steady', description: 'Explore poses one at a time, with space to settle into each position. Expect a slower pace, attention to alignment, breathing exercises, and a relaxing finish.' },
 ]
@@ -125,7 +125,7 @@ function App() {
               {instructors.map((name) => <option key={name}>{name}</option>)}
             </select></label>
           </div>
-          <div className="booking-layout grid items-start gap-8">
+          <div className="booking-layout grid items-start gap-6">
             <div aria-busy={loading}>
               {loading ? <p className="empty-state" role="status">Finding your next moment of calm…</p>
                 : error ? <div className="empty-state" role="alert"><p>{error}</p><button className="text-button" onClick={loadSessions}>Try again</button></div>
@@ -162,7 +162,7 @@ function App() {
           <h2 id="practice-heading">Find your practice.</h2>
           <p className="practice-intro">A different rhythm for every day. Every session is one-on-one, with your instructor guiding the practice around you.</p>
           <div className="grid gap-4 sm:grid-cols-2">
-            {practices.map((practice) => <article className="practice-card" key={practice.name}>
+            {practices.map((practice) => <article className="practice-card" data-class={practice.name} key={practice.name}>
               <img
                 className="practice-image"
                 src={`/images/classes/${practice.name.toLowerCase().replaceAll(' ', '-')}.jpg`}
