@@ -7,12 +7,14 @@ import SessionCalendar from './SessionCalendar'
 
 const classTypes = ['Reformer Pilates', 'Mat Pilates', 'Vinyasa Yoga', 'Hatha Yoga']
 const instructors = ['Eva', 'Sofia', 'Anastasia', 'Ioanna']
+const pageSize = 10
 const sessionDate = new Intl.DateTimeFormat('en-GB', {
   timeZone: 'Europe/Vienna', dateStyle: 'medium', timeStyle: 'short',
 })
 
 export default function Admin() {
   const [sessions, setSessions] = useState<Session[]>([])
+  const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -20,6 +22,10 @@ export default function Admin() {
   const [message, setMessage] = useState('')
   const [now] = useState(() => Date.now())
   const today = dateKey(now)
+  const pageCount = Math.max(1, Math.ceil(sessions.length / pageSize))
+  const currentPage = Math.min(page, pageCount)
+  const pageStart = (currentPage - 1) * pageSize
+  const pageSessions = sessions.slice(pageStart, pageStart + pageSize)
 
   useEffect(() => {
     let active = true
@@ -113,7 +119,7 @@ export default function Admin() {
           : <div className="admin-table-scroll" role="region" aria-label="All sessions and booking statuses" tabIndex={0}>
             <table className="admin-table">
               <thead><tr><th scope="col">Class</th><th scope="col">Instructor</th><th scope="col">Date & time · Vienna</th><th scope="col">Duration</th><th scope="col">Booking status</th></tr></thead>
-              <tbody>{sessions.map((session) => <tr key={session.id}>
+              <tbody>{pageSessions.map((session) => <tr key={session.id}>
                 <td>{session.classType}</td><td>{session.instructor}</td>
                 <td><time dateTime={session.startTime}>{sessionDate.format(new Date(session.startTime))}</time></td>
                 <td>{session.duration} min</td>
@@ -121,6 +127,13 @@ export default function Admin() {
               </tr>)}</tbody>
             </table>
           </div>}
+      {!loading && sessions.length > 0 && <nav className="flex flex-wrap items-center justify-between gap-4 mt-4" aria-label="Session pages">
+        <p className="admin-note" aria-live="polite">{pageStart + 1}–{Math.min(pageStart + pageSize, sessions.length)} of {sessions.length} sessions · Page {currentPage} of {pageCount}</p>
+        <div className="flex gap-2">
+          <button className="week-button" disabled={saving || currentPage === 1} onClick={() => setPage(currentPage - 1)}>← Previous</button>
+          <button className="week-button" disabled={saving || currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>Next →</button>
+        </div>
+      </nav>}
     </section>
   </main>
 }
