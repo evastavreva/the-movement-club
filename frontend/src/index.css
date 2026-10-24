@@ -11,7 +11,7 @@
   --pink: #ead5d3;
 }
 html { scroll-behavior: smooth; }
-body { margin: 0; min-width: 320px; }
+body { margin: 0; min-width: 320px; font-size: 1.1875rem; line-height: 1.5; }
 button, input, select { font: inherit; }
 button, a, input, select { -webkit-tap-highlight-color: transparent; outline-offset: 5px; }
 button { cursor: pointer; }
