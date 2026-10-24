@@ -57,6 +57,12 @@ Open the URL printed by Vite, usually `http://localhost:5173`. The development p
 
 Visit `/admin` to create a future session, then return to `/` and navigate to its week to book it. A fresh database starts empty; the sample sessions added during development are local data and are not included in Git. The admin page is intentionally accessible without login.
 
+## Frontend hosting on Render
+
+The root `render.yaml` defines a Render Static Site for `frontend`. Create a Blueprint from this GitHub repository to deploy it. It builds the Vite app, forwards `/api/*` to `https://the-movement-club-api.onrender.com/*`, and serves `index.html` for frontend routes such as `/admin`. API keys and the Neon connection string belong only in the existing backend service's environment settings.
+
+The hosted database starts empty. Create future sessions through the public `/admin` page to populate the calendar.
+
 ## AI tools used
 
 - **OpenAI Codex:** assisted with implementation, debugging, validation checks, and documentation.

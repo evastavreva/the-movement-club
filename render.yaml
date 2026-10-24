@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: the-movement-club
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci --include=dev && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: NODE_VERSION
+        value: "26"
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://the-movement-club-api.onrender.com/*
+      - type: rewrite
+        source: /*
+        destination: /index.html
