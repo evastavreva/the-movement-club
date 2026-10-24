@@ -5,7 +5,7 @@ h1 { font-size: clamp(32px, 4vw, 48px); line-height: 1.2; letter-spacing: -.035e
 .primary-button { justify-content: center; align-items: center; background: var(--sage); color: #fff; border: 1px solid var(--sage); padding: 13px 25px; border-radius: 999px; font-size: 14px; transition: background .2s; }
 .hero .primary-button { padding: 14px 31px; font-size: 24px; }
 .primary-button:hover { background: #526148; }
-.sessions-section { max-width: 1120px; margin: auto; padding: 60px 24px 80px; scroll-margin-top: 24px; }
+.sessions-section { max-width: 1400px; margin: auto; padding: 60px 24px 80px; scroll-margin-top: 24px; }
 .eyebrow { color: #626d5b; font-size: 11px; letter-spacing: .12em; font-weight: 500; }
 h2 { font-size: clamp(27px, 3vw, 36px); line-height: 1.25; letter-spacing: -.035em; }
 h2 em { color: #68765f; font-style: normal; }
@@ -15,15 +15,6 @@ h2 em { color: #68765f; font-style: normal; }
 label { display: grid; gap: 8px; font-size: 13px; }
 input, select { width: 100%; min-width: 0; padding: 13px 16px; background: #fff; border: 1px solid #cdd1c2; border-radius: 14px; color: #353e33; }
 .result-count { margin-bottom: 15px; }
-.session-card { padding: 24px; background: #fff; border: 1px solid #dfe2d6; border-radius: 24px; transition: border-color .2s; }
-.session-card.is-selected { border-color: var(--sage); box-shadow: 0 0 0 1px var(--sage); }
-.session-card h3 { font-size: 24px; margin-top: 17px; }
-.availability { font-size: 11px; color: #526148; background: #edf0e6; padding: 5px 10px; border-radius: 999px; }
-.instructor { font-size: 13px; color: #626d5b; margin-top: 4px; }
-.session-bottom { border-top: 1px solid #e7e9df; margin-top: 20px; padding-top: 17px; font-size: 13px; }
-.session-time { display: block; margin-top: 5px; font-size: 18px; }
-.session-button { background: transparent; color: #526148; border: 1px solid #aeb9a6; padding: 11px 17px; border-radius: 999px; font-size: 13px; }
-.session-button:hover { background: #edf0e6; }
 .booking-panel { padding: clamp(24px, 3vw, 36px); background: #e8eadf; border-radius: 28px; overflow-wrap: anywhere; }
 .booking-panel h2 { margin: 20px 0; }
 .booking-panel p:not(.eyebrow) { font-size: 14px; line-height: 1.8; }
@@ -52,3 +43,33 @@ footer p { color: #626d5b; }
   .sessions-section { padding: 40px 12px; }
   .practice-section { padding: 0 12px 40px; }
 }
+
+.calendar-toolbar { margin-bottom: 20px; }
+.calendar-toolbar h3 { font-size: 26px; }
+.calendar-toolbar p { color: #626d5b; font-size: 12px; margin-top: 6px; }
+.week-button { border: 1px solid #d5d9cc; border-radius: 12px; background: #fff; padding: 11px 16px; font-size: 13px; }
+.week-button:hover:not(:disabled) { background: var(--pink); }
+.week-button:disabled { cursor: default; }
+.calendar-empty { background: #f7eeec; border-radius: 16px; padding: 18px; font-size: 14px; margin-bottom: 20px; }
+.calendar-scroll { overflow-x: auto; padding: 5px 3px 14px; border-radius: 16px; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 12px; min-width: 1050px; }
+.calendar-day { text-align: center; padding: 14px; color: #626d5b; }
+.calendar-day time { display: block; width: 40px; line-height: 40px; margin: 6px auto 0; font-size: 20px; font-weight: 600; border-radius: 50%; }
+.calendar-day.is-today time { background: var(--pink); color: #353e33; }
+.calendar-period { grid-column: 1 / -1; }
+.calendar-period h4 { padding: 14px 0; border-bottom: 1px solid #d5d9cc; margin-bottom: 14px; font-size: 17px; }
+.calendar-period h4 span { font-size: 11px; margin-left: 12px; color: #626d5b; }
+.calendar-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 12px; }
+.calendar-cell { display: flex; flex-direction: column; gap: 12px; min-width: 0; padding-bottom: 14px; }
+.calendar-session { display: flex; flex-direction: column; gap: 9px; width: 100%; text-align: left; padding: 16px 12px; border: 1px solid transparent; border-radius: 16px; background: var(--pink); color: #353e33; font-size: 12px; overflow-wrap: anywhere; transition: border-color .2s, background .2s; }
+.calendar-session.yoga-session { background: #e8eadf; }
+.calendar-session:hover { border-color: var(--sage); }
+.calendar-session.is-selected { border-color: var(--sage); box-shadow: 0 0 0 1px var(--sage); }
+.calendar-session strong { font-size: 12px; }
+.calendar-class { font-size: 15px; font-weight: 500; }
+.calendar-book { font-size: 11px; margin-top: 6px; }
+.no-session { display: block; text-align: center; padding: 20px 0; color: #a3ab9a; }
+.calendar-scroll-hint { font-size: 12px; color: #626d5b; margin-bottom: 8px; }
+.booking-panel { width: 100%; max-width: 640px; margin-inline: auto; }
+.practice-card:nth-child(even) { background: #f4e6e4; }
+@media (min-width: 1200px) { .calendar-scroll-hint { display: none; } }

@@ -8,6 +8,7 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   --sage: #68765f;
+  --pink: #ead5d3;
 }
 html { scroll-behavior: smooth; }
 body { margin: 0; min-width: 320px; }

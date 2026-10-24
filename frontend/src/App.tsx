@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ApiError, getSessions, bookSession } from './api'
 import type { Session } from './api'
 import type { FormEvent } from 'react'
+import SessionCalendar from './SessionCalendar'
 import './App.css'
 
 const dateFormat = new Intl.DateTimeFormat('en-GB', {
@@ -124,27 +125,14 @@ function App() {
               {instructors.map((name) => <option key={name}>{name}</option>)}
             </select></label>
           </div>
-          <div className="booking-layout grid items-start gap-8 lg:grid-cols-[1.5fr_1fr]">
+          <div className="booking-layout grid items-start gap-8">
             <div aria-busy={loading}>
               {loading ? <p className="empty-state" role="status">Finding your next moment of calm…</p>
                 : error ? <div className="empty-state" role="alert"><p>{error}</p><button className="text-button" onClick={loadSessions}>Try again</button></div>
                   : <>
-                    <p className="result-count" aria-live="polite">{visible.length} available {visible.length === 1 ? 'session' : 'sessions'}</p>
-                    {visible.length === 0 && <div className="empty-state"><h3>A little pause.</h3><p>{available.length ? 'No sessions match these filters.' : 'No upcoming sessions are available. Check back soon.'}</p>
-                      {(classType || instructor) && <button className="text-button" onClick={() => { setClassType(''); setInstructor('') }}>Clear filters</button>}
-                    </div>}
-                    <div className="grid gap-4">
-                      {visible.map((session) => <article key={session.id} className={`session-card ${selected?.id === session.id ? 'is-selected' : ''}`}>
-                        <div className="flex items-center justify-between gap-3"><p className="eyebrow">PRIVATE · {session.duration} MIN</p><span className="availability">Available</span></div>
-                        <h3>{session.classType}</h3><p className="instructor">with {session.instructor}</p>
-                        <div className="session-bottom flex flex-wrap items-center justify-between gap-4">
-                          <p>{dateFormat.format(new Date(session.startTime))}<span className="session-time">{timeFormat.format(new Date(session.startTime))}</span></p>
-                          <button className="session-button" disabled={saving} aria-pressed={selected?.id === session.id} onClick={() => { setSelected(session); setConfirmation(null); setBookingError('') }}>
-                            {selected?.id === session.id ? 'Selected ✓' : 'Book session ↗'}
-                          </button>
-                        </div>
-                      </article>)}
-                    </div>
+                    <SessionCalendar sessions={visible} selectedId={selected?.id} saving={saving} now={now}
+                      onSelect={(session) => { setSelected(session); setConfirmation(null); setBookingError('') }} />
+                    {(classType || instructor) && <button className="text-button" disabled={saving} onClick={() => { setClassType(''); setInstructor('') }}>Clear filters</button>}
                   </>}
             </div>
             <aside className="booking-panel" aria-label="Your booking">
