@@ -81,7 +81,7 @@ function App() {
     const form = new FormData(event.currentTarget)
     const name = String(form.get('name')).trim()
     const email = String(form.get('email')).trim()
-    if (!name) { setBookingError('Please enter your name.'); return }
+    if (Array.from(name).length < 2) { setBookingError('Please enter your full name (at least 2 characters).'); return }
     setSaving(true)
     setBookingError('')
     try {
@@ -143,7 +143,7 @@ function App() {
                 <p className="eyebrow">MAKE TIME FOR YOURSELF</p><h2>Your session.</h2>
                 <SessionDetails session={selected} />
                 <form key={selected.id} onSubmit={submitBooking} className="grid gap-4">
-                  <label>Your name<input ref={nameInput} name="name" autoComplete="name" required disabled={saving} /></label>
+                  <label>Full name<input ref={nameInput} name="name" autoComplete="name" minLength={2} required disabled={saving} /></label>
                   <label>Email address<input name="email" type="email" autoComplete="email" required disabled={saving} /></label>
                   {bookingError && <p className="error-message" role="alert">{bookingError}</p>}
                   <button className="primary-button" disabled={saving}>{saving ? 'Confirming…' : 'Confirm booking ↗'}</button>
