@@ -1,120 +1,188 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
+import { useEffect, useRef, useState } from 'react'
+import { ApiError, getSessions, bookSession } from './api'
+import type { Session } from './api'
+import type { FormEvent } from 'react'
 import './App.css'
 
+const dateFormat = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Europe/Vienna', weekday: 'short', day: 'numeric', month: 'long',
+})
+const timeFormat = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Europe/Vienna', hour: '2-digit', minute: '2-digit',
+})
+
+const practices = [
+  { name: 'Reformer Pilates', pace: 'Controlled · Equipment-based', description: 'Move on a sliding carriage with adjustable springs for support and resistance. Expect precise, guided movements using the footbar, straps, and carriage.' },
+  { name: 'Mat Pilates', pace: 'Focused · Mat-based', description: 'Practice controlled movements on a mat using your own body weight, sometimes with small props. Expect floor exercises that bring attention to your core, alignment, and breath.' },
+  { name: 'Vinyasa Yoga', pace: 'Flowing · Breath-led', description: 'Link poses together in a flowing sequence, moving with your breath. Expect transitions between standing poses, balances, and mat work, followed by a quiet rest.' },
+  { name: 'Hatha Yoga', pace: 'Unhurried · Steady', description: 'Explore poses one at a time, with space to settle into each position. Expect a slower pace, attention to alignment, breathing exercises, and a relaxing finish.' },
+]
+
+function SessionDetails({ session }: { session: Session }) {
+  return <div className="booking-summary">
+    <strong>{session.classType}</strong><p>with {session.instructor}</p>
+    <p>{dateFormat.format(new Date(session.startTime))} · {timeFormat.format(new Date(session.startTime))}</p>
+    <p>{session.duration} minutes · Vienna time</p>
+  </div>
+}
+
 function App() {
-  const [count, setCount] = useState(0)
+  const [sessions, setSessions] = useState<Session[]>([])
+  const [now, setNow] = useState(() => Date.now())
+  const nameInput = useRef<HTMLInputElement>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [classType, setClassType] = useState('')
+  const [instructor, setInstructor] = useState('')
+  const [selected, setSelected] = useState<Session | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [bookingError, setBookingError] = useState('')
+  const [confirmation, setConfirmation] = useState<{ name: string; session: Session } | null>(null)
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 60_000)
+    return () => window.clearInterval(timer)
+  }, [])
+
+  useEffect(() => { if (selected) nameInput.current?.focus() }, [selected])
+
+  async function loadSessions() {
+    setLoading(true)
+    setError('')
+    try {
+      setSessions(await getSessions())
+    } catch {
+      setError('We couldn’t load the schedule. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    let active = true
+    getSessions().then(
+      (data) => { if (active) { setSessions(data); setLoading(false) } },
+      () => { if (active) { setError('We couldn’t load the schedule. Please try again.'); setLoading(false) } },
+    )
+    return () => { active = false }
+  }, [])
+
+  const available = sessions.filter((session) => session.available && new Date(session.startTime).getTime() > now)
+  const visible = available.filter((session) =>
+    (!classType || session.classType === classType) && (!instructor || session.instructor === instructor),
+  )
+  const classTypes = [...new Set(sessions.map((session) => session.classType))].sort()
+  const instructors = [...new Set(sessions.map((session) => session.instructor))].sort()
+
+  async function submitBooking(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!selected || saving) return
+    const form = new FormData(event.currentTarget)
+    const name = String(form.get('name')).trim()
+    const email = String(form.get('email')).trim()
+    if (!name) { setBookingError('Please enter your name.'); return }
+    setSaving(true)
+    setBookingError('')
+    try {
+      await bookSession(selected.id, { name, email })
+      setConfirmation({ name, session: selected })
+      setSessions((current) => current.map((session) => session.id === selected.id ? { ...session, available: false } : session))
+      setSelected(null)
+    } catch (error) {
+      if (error instanceof ApiError && (error.status === 409 || error.status === 404)) {
+        setSessions((current) => current.filter((session) => session.id !== selected.id))
+        setSelected(null)
+        setBookingError('That session is no longer available. Please choose another time.')
+      } else {
+        setBookingError('We couldn’t confirm your booking. Please try again.')
+      }
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
     <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
+      <main>
+        <section className="hero">
+          <p className="hero-tagline">PILATES · YOGA · WELLNESS</p>
+          <h1>the movement club.</h1>
+          <a className="primary-button inline-flex" href="#sessions">Find your flow</a>
+        </section>
+        <section id="sessions" className="sessions-section">
+          <p className="eyebrow">YOUR TIME TO MOVE</p>
+          <div className="section-heading flex flex-wrap items-end justify-between gap-4">
+            <h2>Find your next session.</h2><p>All times shown in Vienna time.</p>
+          </div>
+          <div className="filters grid gap-4 sm:grid-cols-2">
+            <label>Class type<select value={classType} disabled={saving} onChange={(event) => setClassType(event.target.value)}>
+              <option value="">All class types</option>
+              {classTypes.map((type) => <option key={type}>{type}</option>)}
+            </select></label>
+            <label>Instructor<select value={instructor} disabled={saving} onChange={(event) => setInstructor(event.target.value)}>
+              <option value="">All instructors</option>
+              {instructors.map((name) => <option key={name}>{name}</option>)}
+            </select></label>
+          </div>
+          <div className="booking-layout grid items-start gap-8 lg:grid-cols-[1.5fr_1fr]">
+            <div aria-busy={loading}>
+              {loading ? <p className="empty-state" role="status">Finding your next moment of calm…</p>
+                : error ? <div className="empty-state" role="alert"><p>{error}</p><button className="text-button" onClick={loadSessions}>Try again</button></div>
+                  : <>
+                    <p className="result-count" aria-live="polite">{visible.length} available {visible.length === 1 ? 'session' : 'sessions'}</p>
+                    {visible.length === 0 && <div className="empty-state"><h3>A little pause.</h3><p>{available.length ? 'No sessions match these filters.' : 'No upcoming sessions are available. Check back soon.'}</p>
+                      {(classType || instructor) && <button className="text-button" onClick={() => { setClassType(''); setInstructor('') }}>Clear filters</button>}
+                    </div>}
+                    <div className="grid gap-4">
+                      {visible.map((session) => <article key={session.id} className={`session-card ${selected?.id === session.id ? 'is-selected' : ''}`}>
+                        <div className="flex items-center justify-between gap-3"><p className="eyebrow">PRIVATE · {session.duration} MIN</p><span className="availability">Available</span></div>
+                        <h3>{session.classType}</h3><p className="instructor">with {session.instructor}</p>
+                        <div className="session-bottom flex flex-wrap items-center justify-between gap-4">
+                          <p>{dateFormat.format(new Date(session.startTime))}<span className="session-time">{timeFormat.format(new Date(session.startTime))}</span></p>
+                          <button className="session-button" disabled={saving} aria-pressed={selected?.id === session.id} onClick={() => { setSelected(session); setConfirmation(null); setBookingError('') }}>
+                            {selected?.id === session.id ? 'Selected ✓' : 'Book session ↗'}
+                          </button>
+                        </div>
+                      </article>)}
+                    </div>
+                  </>}
+            </div>
+            <aside className="booking-panel" aria-label="Your booking">
+              {confirmation ? <div role="status"><p className="eyebrow">YOU’RE BOOKED</p><h2>See you on the mat,<br /><em>{confirmation.name}.</em></h2><p>Your private session is confirmed.</p>
+                <SessionDetails session={confirmation.session} />
+                <button className="text-button" onClick={() => setConfirmation(null)}>Explore more sessions</button>
+              </div> : selected ? <>
+                <p className="eyebrow">MAKE TIME FOR YOURSELF</p><h2>Your session.</h2>
+                <SessionDetails session={selected} />
+                <form key={selected.id} onSubmit={submitBooking} className="grid gap-4">
+                  <label>Your name<input ref={nameInput} name="name" autoComplete="name" required disabled={saving} /></label>
+                  <label>Email address<input name="email" type="email" autoComplete="email" required disabled={saving} /></label>
+                  {bookingError && <p className="error-message" role="alert">{bookingError}</p>}
+                  <button className="primary-button" disabled={saving}>{saving ? 'Confirming…' : 'Confirm booking ↗'}</button>
+                  <button type="button" className="text-button" disabled={saving} onClick={() => { setSelected(null); setBookingError('') }}>Cancel</button>
+                </form>
+              </> : <>
+                <p className="eyebrow">A PRACTICE THAT’S PERSONAL</p><h2>Just you.<br /><em>And your practice.</em></h2><p>Choose a session to reserve your one-on-one time with an instructor.</p>
+                <div className="panel-divider" /><p className="small-copy">No account needed. Just your name, your email, and a little time for yourself.</p>
+                {bookingError && <p className="error-message" role="alert">{bookingError}</p>}
+              </>}
+            </aside>
+          </div>
+        </section>
+        <section className="practice-section" aria-labelledby="practice-heading">
+          <p className="eyebrow">FOUR WAYS TO MOVE</p>
+          <h2 id="practice-heading">Find your practice.</h2>
+          <p className="practice-intro">A different rhythm for every day. Every session is one-on-one, with your instructor guiding the practice around you.</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {practices.map((practice) => <article className="practice-card" key={practice.name}>
+              <p className="eyebrow">{practice.pace}</p>
+              <h3>{practice.name}</h3>
+              <p>{practice.description}</p>
+            </article>)}
+          </div>
+        </section>
+      </main>
+      <footer className="flex flex-wrap items-center justify-between gap-4"><span>THE MOVEMENT CLUB</span><p>A little movement. A little more you.</p></footer>
     </>
   )
 }
