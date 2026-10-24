@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { createSession, getSessions } from './api'
 import type { Session } from './api'
 import { dateKey, studioStartTime } from './calendarDates'
+import SessionCalendar from './SessionCalendar'
 
 const classTypes = ['Reformer Pilates', 'Mat Pilates', 'Vinyasa Yoga', 'Hatha Yoga']
 const instructors = ['Eva', 'Sofia', 'Anastasia', 'Ioanna']
@@ -17,7 +18,8 @@ export default function Admin() {
   const [error, setError] = useState('')
   const [formError, setFormError] = useState('')
   const [message, setMessage] = useState('')
-  const [today] = useState(() => dateKey(Date.now()))
+  const [now] = useState(() => Date.now())
+  const today = dateKey(now)
 
   useEffect(() => {
     let active = true
@@ -93,6 +95,12 @@ export default function Admin() {
       </form>
       {formError && <p className="error-message" role="alert">{formError}</p>}
       {message && <p className="admin-success" role="status">{message}</p>}
+    </section>
+    <section className="admin-calendar" aria-labelledby="schedule-heading" aria-busy={loading}>
+      <h2 id="schedule-heading">Weekly schedule.</h2>
+      <p className="admin-note">All sessions, booked and unbooked. Times are shown in Vienna time.</p>
+      {loading && <p className="admin-note" role="status">Updating schedule…</p>}
+      <SessionCalendar sessions={sessions} saving={saving || loading} now={now} admin />
     </section>
     <section aria-labelledby="all-sessions-heading">
       <div className="flex flex-wrap items-center justify-between gap-4">

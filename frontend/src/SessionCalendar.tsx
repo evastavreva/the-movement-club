@@ -13,10 +13,11 @@ type Props = {
   selectedId?: number
   saving: boolean
   now: number
-  onSelect: (session: Session) => void
+  admin?: boolean
+  onSelect?: (session: Session) => void
 }
 
-export default function SessionCalendar({ sessions, selectedId, saving, now, onSelect }: Props) {
+export default function SessionCalendar({ sessions, selectedId, saving, now, onSelect, admin = false }: Props) {
   const [weekOffset, setWeekOffset] = useState(0)
   const [chosenDay, setChosenDay] = useState('')
   const days = weekDays(now, weekOffset)
@@ -31,20 +32,18 @@ export default function SessionCalendar({ sessions, selectedId, saving, now, onS
   const daily = weekly.filter((session) => dateKey(session.startTime) === activeDay)
 
   function renderSession(session: Session) {
-    return <button
-                    key={session.id}
-                    className={`calendar-session ${selectedId === session.id ? 'is-selected' : ''}`}
-                    data-class={session.classType}
-                    disabled={saving}
-                    aria-pressed={selectedId === session.id}
-                    aria-label={`Book ${session.classType} with ${session.instructor}, ${fullDate.format(new Date(session.startTime))} at ${timeLabel.format(new Date(session.startTime))}, ${session.duration} minutes`}
-                    onClick={() => onSelect(session)}
-                  >
-                    <strong>{timeLabel.format(new Date(session.startTime))} · {session.duration} min</strong>
-                    <span className="calendar-class">{session.classType}</span>
-                    <span>with {session.instructor}</span>
-                    <span className="calendar-book">{selectedId === session.id ? 'Selected ✓' : 'Book private session ↗'}</span>
-                  </button>
+    const content = <>
+      <strong>{timeLabel.format(new Date(session.startTime))} · {session.duration} min</strong>
+      <span className="calendar-class">{session.classType}</span>
+      <span>with {session.instructor}</span>
+      <span className="calendar-book">{admin ? (session.available ? 'Unbooked' : 'Booked') : selectedId === session.id ? 'Selected ✓' : 'Book private session ↗'}</span>
+    </>
+    if (admin) return <article key={session.id} className="calendar-session" data-class={session.classType}>{content}</article>
+    return <button key={session.id}
+      className={`calendar-session ${selectedId === session.id ? 'is-selected' : ''}`}
+      data-class={session.classType} disabled={saving} aria-pressed={selectedId === session.id}
+      aria-label={`Book ${session.classType} with ${session.instructor}, ${fullDate.format(new Date(session.startTime))} at ${timeLabel.format(new Date(session.startTime))}, ${session.duration} minutes`}
+      onClick={() => onSelect?.(session)}>{content}</button>
   }
 
   return <div className="calendar">
@@ -54,13 +53,13 @@ export default function SessionCalendar({ sessions, selectedId, saving, now, onS
         <p>{fullDate.format(days[0])} – {fullDate.format(days[6])}</p>
       </div>
       <nav className="flex flex-wrap gap-2" aria-label="Calendar weeks">
-        <button className="week-button" disabled={saving || weekOffset === 0} onClick={() => setWeekOffset(weekOffset - 1)}>← Previous week</button>
-        {weekOffset > 0 && <button className="week-button" disabled={saving} onClick={() => setWeekOffset(0)}>This week</button>}
+        <button className="week-button" disabled={saving || (!admin && weekOffset === 0)} onClick={() => setWeekOffset(weekOffset - 1)}>← Previous week</button>
+        {weekOffset !== 0 && <button className="week-button" disabled={saving} onClick={() => setWeekOffset(0)}>This week</button>}
         <button className="week-button" disabled={saving} onClick={() => setWeekOffset(weekOffset + 1)}>Next week →</button>
       </nav>
     </div>
-    <p className="result-count" role="status">{weekly.length} available {weekly.length === 1 ? 'session' : 'sessions'} this week</p>
-    {weekly.length === 0 && <p className="calendar-empty">No sessions match this week. Try another week or change your filters.</p>}
+    <p className="result-count" role="status">{weekly.length} {admin ? 'scheduled' : 'available'} {weekly.length === 1 ? 'session' : 'sessions'} this week</p>
+    {weekly.length === 0 && <p className="calendar-empty">{admin ? 'No sessions scheduled this week.' : 'No sessions match this week. Try another week or change your filters.'}</p>}
     <div className="mobile-calendar">
       <div className="mobile-week" role="group" aria-label="Choose a day">
         {days.map((day, index) => <button key={keys[index]}
@@ -74,7 +73,7 @@ export default function SessionCalendar({ sessions, selectedId, saving, now, onS
       </div>
       <div className="mobile-agenda" aria-live="polite">
         <h4>{fullDate.format(new Date(`${activeDay}T12:00:00Z`))}</h4>
-        {daily.length === 0 ? <p className="calendar-empty">No available sessions on this day. Choose another day above.</p>
+        {daily.length === 0 ? <p className="calendar-empty">{admin ? 'No sessions scheduled on this day.' : 'No available sessions on this day. Choose another day above.'}</p>
           : periods.map((period) => {
             const slots = daily.filter((session) => periodOf(session.startTime) === period)
             return slots.length > 0 && <section className="mobile-period" aria-label={period} key={period}>
@@ -84,7 +83,6 @@ export default function SessionCalendar({ sessions, selectedId, saving, now, onS
           })}
       </div>
     </div>
-    <p className="calendar-scroll-hint">Swipe or scroll sideways to see all seven days.</p>
     <div className="calendar-scroll" role="region" aria-label="Weekly session calendar" tabIndex={0}>
       <div className="calendar-grid">
         {days.map((day, index) => <div className={`calendar-day ${keys[index] === dateKey(now) ? 'is-today' : ''}`} key={keys[index]}>

@@ -57,7 +57,7 @@ footer p { color: #626d5b; }
 .week-button:disabled { cursor: default; }
 .calendar-empty { background: #f7eeec; border-radius: 16px; padding: 18px; font-size: 1.0625rem; margin-bottom: 20px; }
 .calendar-scroll { width: 100%; max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; padding: 5px 3px 14px; border-radius: 16px; }
-.calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 12px; min-width: 1080px; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 12px; min-width: 0; }
 .calendar-day { text-align: center; padding: 14px; color: #626d5b; }
 .calendar-day time { display: block; width: 44px; line-height: 44px; margin: 6px auto 0; font-size: 1.4375rem; font-weight: 600; border-radius: 50%; }
 .calendar-day.is-today time { background: var(--pink); color: #353e33; }
@@ -73,15 +73,14 @@ footer p { color: #626d5b; }
 .calendar-class { font-size: 1.125rem; font-weight: 500; }
 .calendar-book { font-size: 0.875rem; margin-top: 6px; }
 .no-session { display: block; text-align: center; padding: 20px 0; color: #a3ab9a; }
-.calendar-scroll-hint { font-size: 0.9375rem; color: #626d5b; margin-bottom: 8px; }
 .booking-panel { width: 100%; max-width: 560px; margin-inline: auto; }
 [data-class="Reformer Pilates"] { --class-color: #f4e3e1; }
 [data-class="Mat Pilates"] { --class-color: #ead0cd; }
 [data-class="Vinyasa Yoga"] { --class-color: #e8eddf; }
 [data-class="Hatha Yoga"] { --class-color: #d6dfc9; }
-@media (min-width: 1200px) { .calendar-scroll-hint { display: none; } }
 .admin-page { max-width: 1120px; margin: auto; padding: 40px 24px 64px; }
 .admin-header { margin-bottom: 28px; }
+.admin-calendar { min-width: 0; margin-bottom: 48px; }
 .admin-header h1 { margin: 12px 0; }
 .admin-form-panel { padding: clamp(20px, 4vw, 36px); border-radius: 28px; background: #e8eadf; margin-bottom: 48px; }
 .admin-note { font-size: 1.0625rem; color: #626d5b; line-height: 1.7; margin-block: 18px; }
@@ -95,8 +94,8 @@ footer p { color: #626d5b; }
 .status-badge { display: inline-block; padding: 6px 12px; background: #e8eadf; border-radius: 999px; font-size: 0.9375rem; }
 .status-badge.is-booked { background: var(--pink); }
 .mobile-calendar { display: none; }
-@media (max-width: 767px) {
-  .calendar-scroll, .calendar-scroll-hint { display: none; }
+@media (max-width: 1023px) {
+  .calendar-scroll { display: none; }
   .mobile-calendar { display: block; }
   .mobile-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; margin-block: 20px; }
   .mobile-day { min-width: 0; padding: 10px 0; border: 1px solid transparent; border-radius: 12px; text-align: center; font-size: .875rem; }
