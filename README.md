@@ -84,6 +84,8 @@ If Gemini is missing, unavailable, or returns incomplete content, a standard mes
 
 Run `npm test` inside `backend` for mocked provider success/failure, booking validation, and double-booking conflict checks. Tests do not send real emails.
 
+Run `npm run test:e2e` inside `backend` with the local database running and migrations applied to test real concurrent bookings. Two simultaneous HTTP requests must produce one `201` and one `409`, leave exactly one booking in PostgreSQL, and mark the session unavailable. This test disables email and removes only its own test records afterward.
+
 ## What I would improve with more time
 
 - Add authentication for the studio host.
