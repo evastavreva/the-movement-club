@@ -1,5 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { CreateBookingDto } from './create-booking.dto.js';
 import { CreateSessionDto } from './create-session.dto.js';
 
 @Injectable()
@@ -26,5 +28,23 @@ export class SessionsService {
       ...session,
       available: booking === null,
     }));
+  }
+
+  async book(sessionId: number, dto: CreateBookingDto) {
+    try {
+      return await this.prisma.booking.create({
+        data: { sessionId, name: dto.name, email: dto.email },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new ConflictException('This session is already booked.');
+        }
+        if (error.code === 'P2003') {
+          throw new NotFoundException('Session not found.');
+        }
+      }
+      throw error;
+    }
   }
 }
