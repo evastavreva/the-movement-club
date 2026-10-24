@@ -175,9 +175,17 @@ function App() {
           <p className="practice-intro">A different rhythm for every day. Every session is one-on-one, with your instructor guiding the practice around you.</p>
           <div className="grid gap-4 sm:grid-cols-2">
             {practices.map((practice) => <article className="practice-card" key={practice.name}>
-              <p className="eyebrow">{practice.pace}</p>
-              <h3>{practice.name}</h3>
-              <p>{practice.description}</p>
+              <img
+                className="practice-image"
+                src={`/images/classes/${practice.name.toLowerCase().replaceAll(' ', '-')}.jpg`}
+                alt={`A woman practicing ${practice.name} in a softly lit studio`}
+                width="1200" height="800" loading="lazy" decoding="async"
+              />
+              <div className="practice-copy">
+                <p className="eyebrow">{practice.pace}</p>
+                <h3>{practice.name}</h3>
+                <p>{practice.description}</p>
+              </div>
             </article>)}
           </div>
         </section>

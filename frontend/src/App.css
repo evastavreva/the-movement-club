@@ -40,9 +40,11 @@ footer p { color: #626d5b; }
 .practice-section { max-width: 1120px; margin: auto; padding: 0 24px 64px; }
 .practice-section h2 { margin-top: 12px; }
 .practice-intro { max-width: 600px; margin: 16px 0 28px; color: #626d5b; font-size: 14px; line-height: 1.8; }
-.practice-card { padding: 28px; background: #eef0e7; border-radius: 24px; }
+.practice-card { overflow: hidden; background: #eef0e7; border-radius: 24px; }
+.practice-image { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
+.practice-copy { padding: 28px; }
 .practice-card h3 { margin: 14px 0 12px; font-size: 23px; }
-.practice-card > p:last-child { color: #626d5b; font-size: 14px; line-height: 1.8; }
+.practice-copy > p:last-child { color: #626d5b; font-size: 14px; line-height: 1.8; }
 @media (max-width: 639px) {
   .hero { padding: 30px 16px; border-radius: 26px; }
   .hero-tagline { font-size: 14px; }
