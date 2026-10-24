@@ -178,7 +178,7 @@ function App() {
           </div>
         </section>
       </main>
-      <footer className="flex flex-wrap items-center justify-between gap-4"><span>THE MOVEMENT CLUB</span><p>A little movement. A little more you.</p></footer>
+      <footer className="flex flex-wrap items-center justify-between gap-4"><span>THE MOVEMENT CLUB</span><p>A little movement. A little more you.</p><a className="text-button" href="/admin">Studio admin</a></footer>
     </>
   )
 }

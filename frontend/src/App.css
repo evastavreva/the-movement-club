@@ -73,3 +73,17 @@ footer p { color: #626d5b; }
 .booking-panel { width: 100%; max-width: 640px; margin-inline: auto; }
 .practice-card:nth-child(even) { background: #f4e6e4; }
 @media (min-width: 1200px) { .calendar-scroll-hint { display: none; } }
+.admin-page { max-width: 1120px; margin: auto; padding: 40px 24px 64px; }
+.admin-header { margin-bottom: 28px; }
+.admin-header h1 { margin: 12px 0; }
+.admin-form-panel { padding: clamp(20px, 4vw, 36px); border-radius: 28px; background: #e8eadf; margin-bottom: 48px; }
+.admin-note { font-size: 14px; color: #626d5b; line-height: 1.7; margin-block: 18px; }
+.admin-submit { align-self: end; min-height: 48px; }
+.admin-success { font-size: 14px; color: #354e31; margin-top: 20px; }
+.admin-table-scroll { overflow-x: auto; margin-top: 24px; border: 1px solid #d5d9cc; border-radius: 20px; }
+.admin-table { border-collapse: collapse; width: 100%; min-width: 700px; text-align: left; font-size: 14px; }
+.admin-table th, .admin-table td { padding: 18px; border-bottom: 1px solid #e4e6dc; }
+.admin-table th { font-weight: 500; background: #eef0e7; }
+.admin-table tr:last-child td { border-bottom: none; }
+.status-badge { display: inline-block; padding: 6px 12px; background: #e8eadf; border-radius: 999px; font-size: 12px; }
+.status-badge.is-booked { background: var(--pink); }

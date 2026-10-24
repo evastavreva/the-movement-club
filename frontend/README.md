@@ -27,7 +27,15 @@ Open the local URL printed by Vite. The development proxy forwards `/api` to the
 - Class type and instructor filters work together; their options come from saved sessions.
 - A name and email are required to book. Successful bookings disappear from availability.
 - If someone else books first, the customer sees a message and can choose another session.
-- An empty database shows an empty schedule. Create sessions through `POST /sessions`; the admin UI is the next increment.
+- An empty database shows an empty schedule. Create sessions at `/admin`.
+
+## Studio admin
+
+Open `/admin` or use the Studio admin link in the footer. Create sessions using a fixed list of four class types and instructors: Eva, Sofia, Anastasia, and Ioanna. View all sessions and use Refresh status to see new bookings.
+
+Dates and times entered in the form are interpreted in `Europe/Vienna`, regardless of the browser's time zone. Nonexistent times during the spring clock change are rejected; repeated autumn times use the first occurrence.
+
+The admin page has no authentication, as required by the challenge. The eight initial sample sessions were added to the local database; they are not recreated automatically on other machines.
 
 ## Checks and deployment
 
@@ -36,4 +44,4 @@ npm run build
 npm run lint
 ```
 
-The production output is `dist/`. The Vite proxy is for development only: production hosting must forward `/api/*` to the NestJS backend and remove the `/api` prefix.
+The production output is `dist/`. The Vite proxy is for development only: production hosting must forward `/api/*` to the NestJS backend and remove the `/api` prefix. Serve `index.html` for frontend routes such as `/admin`.

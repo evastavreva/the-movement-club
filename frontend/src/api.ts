@@ -21,6 +21,15 @@ export async function getSessions(): Promise<Session[]> {
   return response.json()
 }
 
+export async function createSession(session: Pick<Session, 'classType' | 'instructor' | 'startTime' | 'duration'>): Promise<void> {
+  const response = await fetch('/api/sessions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(session),
+  })
+  if (!response.ok) throw new ApiError(response.status)
+}
+
 export async function bookSession(id: number, booking: { name: string; email: string }): Promise<void> {
   const response = await fetch(`/api/sessions/${id}/book`, {
     method: 'POST',
