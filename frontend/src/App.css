@@ -110,3 +110,5 @@ footer p { color: #626d5b; }
   .calendar-toolbar nav { width: 100%; }
   .calendar-toolbar .week-button { padding: 10px 12px; }
 }
+.confirmation-bubble { position: relative; background: var(--pink); border-radius: 20px 20px 20px 4px; padding: 20px; margin-top: 24px; }
+.confirmation-bubble .eyebrow { margin-bottom: 10px; }

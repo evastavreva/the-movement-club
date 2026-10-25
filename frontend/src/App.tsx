@@ -38,7 +38,7 @@ function App() {
   const [selected, setSelected] = useState<Session | null>(null)
   const [saving, setSaving] = useState(false)
   const [bookingError, setBookingError] = useState('')
-  const [confirmation, setConfirmation] = useState<{ name: string; session: Session; emailStatus: BookingResult['emailStatus'] } | null>(null)
+  const [confirmation, setConfirmation] = useState<BookingResult & { name: string; session: Session } | null>(null)
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 60_000)
@@ -86,7 +86,7 @@ function App() {
     setBookingError('')
     try {
       const result = await bookSession(selected.id, { name, email })
-      setConfirmation({ name, session: selected, emailStatus: result.emailStatus })
+      setConfirmation({ ...result, name, session: selected })
       setSessions((current) => current.map((session) => session.id === selected.id ? { ...session, available: false } : session))
       setSelected(null)
     } catch (error) {
@@ -137,6 +137,10 @@ function App() {
             </div>
             <aside className="booking-panel" aria-label="Your booking">
               {confirmation ? <div role="status"><p className="eyebrow">YOU’RE BOOKED</p><h2>See you on the mat,<br /><em>{confirmation.name}.</em></h2><p>Your private session is confirmed.</p>
+                {confirmation.message && <div className="confirmation-bubble">
+                  <p className="eyebrow">{confirmation.aiGenerated ? 'PREPARE FOR YOUR SESSION · AI TIPS' : 'PREPARE FOR YOUR SESSION'}</p>
+                  <p>{confirmation.message}</p>
+                </div>}
                 <SessionDetails session={confirmation.session} />
                 {confirmation.emailStatus === 'sent' && <p>Your confirmation email is on its way. Please check your inbox and spam folder.</p>}
                 {confirmation.emailStatus === 'failed' && <p>Your booking is saved, but we couldn’t send the email. Please keep these session details.</p>}

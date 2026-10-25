@@ -16,7 +16,15 @@ describe('AppController (e2e)', () => {
       imports: [AppModule],
     })
       .overrideProvider(BookingEmailService)
-      .useValue({ send: vi.fn().mockResolvedValue('disabled') })
+      .useValue({
+        send: vi
+          .fn()
+          .mockResolvedValue({
+            emailStatus: 'disabled',
+            message: 'Welcome to your session!',
+            aiGenerated: false,
+          }),
+      })
       .compile();
 
     app = moduleFixture.createNestApplication();

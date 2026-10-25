@@ -44,8 +44,11 @@ export class SessionsService {
         data: { sessionId, name: dto.name, email: dto.email },
         include: { session: true },
       });
-      const emailStatus = await this.bookingEmail.send({ ...booking, session });
-      return { ...booking, emailStatus };
+      const confirmation = await this.bookingEmail.send({
+        ...booking,
+        session,
+      });
+      return { ...booking, ...confirmation };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {

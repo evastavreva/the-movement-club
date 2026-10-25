@@ -7,7 +7,11 @@ export type Session = {
   available: boolean
 }
 
-export type BookingResult = { emailStatus: 'sent' | 'failed' | 'disabled' }
+export type BookingResult = {
+  emailStatus: 'sent' | 'failed' | 'disabled'
+  message: string
+  aiGenerated: boolean
+}
 
 export class ApiError extends Error {
   status: number

@@ -25,7 +25,7 @@ const generated = {
       content: {
         parts: [
           {
-            text: 'Enjoy a moment of mindful movement. We look forward to welcoming you!',
+            text: 'For Mat Pilates, expect controlled floor exercises. Wear comfortable clothing and bring water. Check whether a mat is provided.',
           },
         ],
       },
@@ -54,7 +54,7 @@ it('emails the AI message and exact session details to the booking address', asy
   fetchMock
     .mockResolvedValueOnce(Response.json(generated))
     .mockResolvedValueOnce(Response.json({ id: 'email-id' }));
-  expect(await service.send(booking)).toBe('sent');
+  expect(await service.send(booking)).toMatchObject({ emailStatus: 'sent' });
   const aiBody = fetchMock.mock.calls[0][1]?.body as string;
   expect(aiBody).not.toContain(booking.name);
   expect(aiBody).not.toContain(booking.email);
@@ -69,19 +69,24 @@ it('emails the AI message and exact session details to the booking address', asy
   });
 });
 
-it('skips both providers when email is not configured', async () => {
+it('returns an AI message for the browser even when email is not configured', async () => {
   vi.stubEnv('RESEND_API_KEY', '');
-  expect(await service.send(booking)).toBe('disabled');
-  expect(fetchMock).not.toHaveBeenCalled();
+  fetchMock.mockResolvedValueOnce(Response.json(generated));
+  expect(await service.send(booking)).toMatchObject({
+    emailStatus: 'disabled',
+    aiGenerated: true,
+    message: generated.candidates[0].content.parts[0].text,
+  });
+  expect(fetchMock).toHaveBeenCalledTimes(1);
 });
 
 it('sends a standard email when Gemini is not configured', async () => {
   vi.stubEnv('GEMINI_API_KEY', '');
   fetchMock.mockResolvedValueOnce(Response.json({ id: 'email-id' }));
-  expect(await service.send(booking)).toBe('sent');
+  expect(await service.send(booking)).toMatchObject({ emailStatus: 'sent' });
   expect(fetchMock).toHaveBeenCalledTimes(1);
   expect(fetchMock.mock.calls[0][1]?.body as string).toContain(
-    'Thank you for making time for yourself',
+    'For your Mat Pilates session:',
   );
 });
 
@@ -95,9 +100,9 @@ it.each([
     fetchMock
       .mockResolvedValueOnce(aiResponse)
       .mockResolvedValueOnce(Response.json({ id: 'email-id' }));
-    expect(await service.send(booking)).toBe('sent');
+    expect(await service.send(booking)).toMatchObject({ emailStatus: 'sent' });
     expect(fetchMock.mock.calls[1][1]?.body as string).toContain(
-      'Thank you for making time for yourself',
+      'For your Mat Pilates session:',
     );
   },
 );
@@ -106,7 +111,7 @@ it('falls back on AI timeout and reports email failure without throwing', async 
   fetchMock
     .mockRejectedValueOnce(new Error('timeout'))
     .mockResolvedValueOnce(new Response(null, { status: 403 }));
-  expect(await service.send(booking)).toBe('failed');
+  expect(await service.send(booking)).toMatchObject({ emailStatus: 'failed' });
 });
 
 it('keeps a successful booking when both providers fail', async () => {
@@ -140,3 +145,46 @@ it('does not call either provider for a double-booking conflict', async () => {
   ).rejects.toMatchObject({ status: 409 });
   expect(fetchMock).not.toHaveBeenCalled();
 });
+
+it('returns the generated message even when email is rejected', async () => {
+  fetchMock
+    .mockResolvedValueOnce(Response.json(generated))
+    .mockResolvedValueOnce(new Response(null, { status: 403 }));
+  expect(await service.send(booking)).toMatchObject({
+    emailStatus: 'failed',
+    aiGenerated: true,
+    message: generated.candidates[0].content.parts[0].text,
+  });
+});
+
+it('returns a clearly identified standard message without configured providers', async () => {
+  vi.stubEnv('GEMINI_API_KEY', '');
+  vi.stubEnv('RESEND_API_KEY', '');
+  expect(await service.send(booking)).toMatchObject({
+    emailStatus: 'disabled',
+    aiGenerated: false,
+    message: expect.stringContaining('For your Mat Pilates session:'),
+  });
+  expect(fetchMock).not.toHaveBeenCalled();
+});
+
+it.each([
+  ['Reformer Pilates', 'grip socks'],
+  ['Mat Pilates', 'floor exercises'],
+  ['Vinyasa Yoga', 'flowing transitions'],
+  ['Hatha Yoga', 'slower practice'],
+])(
+  'provides class-specific preparation and what to bring without AI: %s',
+  async (classType, detail) => {
+    vi.stubEnv('GEMINI_API_KEY', '');
+    vi.stubEnv('RESEND_API_KEY', '');
+    const result = await service.send({
+      ...booking,
+      session: { ...booking.session, classType },
+    });
+    expect(result.aiGenerated).toBe(false);
+    expect(result.message).toContain(classType);
+    expect(result.message.toLowerCase()).toContain(detail);
+    expect(result.message).toContain('bring water');
+  },
+);
